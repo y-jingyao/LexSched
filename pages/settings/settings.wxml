@@ -81,7 +81,6 @@
   <!-- 底部信息 -->
   <view class="footer">
     <text class="footer-text">Copyright © 2026 - now yanghx. All Rights Reserved.
-      鲁ICP备2025168409号
     </text>
   </view>
 </view>

@@ -97,8 +97,8 @@ Page({
   // 关于
   about: function () {
     wx.showModal({
-      title: '关于 课程表',
-      content: 'Copyright © 2026 - now yanghx. All Rights Reserved. \n鲁ICP备2025168409号\n\n版本：v0.0.1 \n\n至于为什么叫AssetPulse你别管\n\n后期会对教务系统进行适配，也可能会做成app',
+      title: '关于 LexSched课程表',
+      content: 'Copyright © 2026 - now yanghx. All Rights Reserved. \n\n版本：v0.0.1 \n\n后期会对教务系统进行适配，也可能会做成app',
       showCancel: false
     })
   }

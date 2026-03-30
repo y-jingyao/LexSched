@@ -5,7 +5,7 @@
   ],
   "window":{
     "backgroundTextStyle": "dark",
-    "navigationBarTitleText": "TimeTable",
+    "navigationBarTitleText": "LexSched",
     "navigationBarBackgroundColor": "#7cba23",
     "navigationBarTextStyle": "white"
   },
