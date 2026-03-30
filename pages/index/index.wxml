@@ -1,0 +1,145 @@
+<!--index.wxml-->
+<view class="page-container">
+  <view class="header">
+    <view class="header-left">
+      <view class="week-info">{{weekInfo}}</view>
+      <view class="week-num">第{{currentWeek}}周</view>
+      <view class="date-info">{{currentDate}}</view>
+    </view>
+    <view class="header-right">
+      <view class="add-btn" bindtap="showAddModal">+</view>
+    </view>
+  </view>
+
+  <view class="calendar-row">
+    <view class="month">{{currentMonth}}</view>
+    <view wx:for="{{weekDays}}" wx:key="index" class="day-cell {{item.isToday ? 'today' : ''}}">
+      <view class="week-day">{{item.weekDay}}</view>
+      <view class="day-num">{{item.day}}</view>
+    </view>
+  </view>
+
+  <scroll-view scroll-y="true" class="scroll">
+    <view class="timetable-container">
+      <view class="time-column">
+        <view wx:for="{{timeList}}" wx:key="index" class="time-slot">
+          <view class="lesson-num">{{index + 1}}</view>
+          <view class="start-time">{{item.start}}</view>
+          <view class="end-time">{{item.end}}</view>
+        </view>
+      </view>
+      
+      <view class="course-grid">
+        <view wx:for="{{[1,2,3,4,5,6,7,8,9,10,11]}}" wx:key="index" class="grid-line" style="top:{{index * 120}}rpx;"></view>
+        
+        <view wx:for="{{visibleCourses}}" wx:for-item="courseItem" wx:for-index="courseIndex" wx:key="courseIndex">
+          <view wx:if="{{courseItem.isVisible}}" class="course-card {{courseItem.isCurrentWeek ? '' : 'not-current-week'}}" 
+                bindtap="showCourseDetail" 
+                data-id="{{courseItem.id}}"
+                style="left:{{(courseItem.onweek-1) * 100}}rpx;top:{{(courseItem.startLesson-1) * 120 + 5}}rpx;height:{{courseItem.duration * 120 - 10}}rpx;background-color:{{courseItem.isCurrentWeek ? (courseItem.color ? courseItem.color : colorArrays[(courseItem.id-1)%9]) : '#999999'}}">
+            <view class="course-name">{{courseItem.courseName}}</view>
+            <view wx:if="{{!courseItem.isCurrentWeek}}" class="not-current-week-tag">非本周</view>
+            <view class="course-teacher">{{courseItem.teacher}}</view>
+            <view class="course-location">{{courseItem.location}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</view>
+
+<!-- 课程详情/编辑弹窗 -->
+<view class="modal-mask" wx:if="{{showModal}}" bindtap="hideModal"></view>
+<view class="modal-content" wx:if="{{showModal}}">
+  <view class="modal-header">
+    <text class="modal-title">{{modalType === 'add' ? '添加课程' : modalType === 'edit' ? '编辑课程' : '课程详情'}}</text>
+    <view class="modal-close" bindtap="hideModal">×</view>
+  </view>
+  
+  <scroll-view scroll-y class="modal-body">
+    <view wx:if="{{modalType === 'detail'}}" class="detail-view">
+      <view class="detail-item">
+        <text class="detail-label">课程名称</text>
+        <text class="detail-value">{{currentCourse.courseName}}</text>
+      </view>
+      <view class="detail-item">
+        <text class="detail-label">授课老师</text>
+        <text class="detail-value">{{currentCourse.teacher}}</text>
+      </view>
+      <view class="detail-item">
+        <text class="detail-label">上课地点</text>
+        <text class="detail-value">{{currentCourse.location}}</text>
+      </view>
+      <view class="detail-item">
+        <text class="detail-label">上课时间</text>
+        <text class="detail-value">周{{['一','二','三','四','五','六','日'][(currentCourse.onweek || 1)-1]}} 第{{currentCourse.startLesson}}-{{currentCourse.startLesson+currentCourse.duration-1}}节</text>
+      </view>
+      <view class="detail-item">
+        <text class="detail-label">上课周次</text>
+        <text class="detail-value">{{currentCourse.weeksText || '未设置'}}</text>
+      </view>
+      <view class="detail-actions">
+        <view class="btn btn-edit" bindtap="editCourse">编辑</view>
+        <view class="btn btn-delete" bindtap="deleteCourse">删除</view>
+      </view>
+    </view>
+    
+    <view wx:else class="form-view">
+      <view class="form-item">
+        <text class="form-label">课程名称</text>
+        <input class="form-input" value="{{formData.courseName}}" bindinput="inputChange" data-field="courseName" placeholder="请输入课程名称"/>
+      </view>
+      <view class="form-item">
+        <text class="form-label">授课老师</text>
+        <input class="form-input" value="{{formData.teacher}}" bindinput="inputChange" data-field="teacher" placeholder="请输入老师姓名"/>
+      </view>
+      <view class="form-item">
+        <text class="form-label">上课地点</text>
+        <input class="form-input" value="{{formData.location}}" bindinput="inputChange" data-field="location" placeholder="请输入上课地点"/>
+      </view>
+      <view class="form-item">
+        <text class="form-label">星期</text>
+        <picker mode="selector" range="{{['周一','周二','周三','周四','周五','周六','周日']}}" value="{{(formData.onweek || 1)-1}}" bindchange="dayChange">
+          <view class="form-picker">周{{['一','二','三','四','五','六','日'][(formData.onweek || 1)-1]}}</view>
+        </picker>
+      </view>
+      <view class="form-item">
+        <text class="form-label">开始节次</text>
+        <picker mode="selector" range="{{[1,2,3,4,5,6,7,8,9,10]}}" value="{{(formData.startLesson || 1)-1}}" bindchange="startChange">
+          <view class="form-picker">第{{formData.startLesson}}节</view>
+        </picker>
+      </view>
+      <view class="form-item">
+        <text class="form-label">持续节数</text>
+        <picker mode="selector" range="{{[1,2,3,4]}}" value="{{(formData.duration || 2)-1}}" bindchange="durationChange">
+          <view class="form-picker">{{formData.duration}}节</view>
+        </picker>
+      </view>
+      <view class="form-item">
+        <text class="form-label">上课周次（点击选择）</text>
+        <view class="weeks-selector">
+          <view wx:for="{{weeksList}}" wx:for-item="weekItem" wx:key="*this" 
+                class="week-tag {{weeksSet[weekItem] ? 'selected' : ''}}"
+                bindtap="toggleWeek" data-week="{{weekItem}}">
+            {{weekItem}}
+          </view>
+        </view>
+      </view>
+      <view class="form-item">
+        <text class="form-label">卡片颜色</text>
+        <view class="color-selector">
+          <view wx:for="{{colorArrays}}" wx:key="*this" 
+                class="color-tag {{formData.colorIndex === index ? 'selected' : ''}}"
+                style="background-color: {{item}}"
+                bindtap="selectColor" data-index="{{index}}">
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+  
+  <view class="modal-footer" wx:if="{{modalType !== 'detail'}}">
+    <view class="btn btn-cancel" bindtap="hideModal">取消</view>
+    <view class="btn btn-confirm" bindtap="saveCourse">保存</view>
+  </view>
+</view>

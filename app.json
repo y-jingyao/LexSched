@@ -1,0 +1,27 @@
+{
+  "pages":[
+    "pages/index/index",
+    "pages/settings/settings"
+  ],
+  "window":{
+    "backgroundTextStyle": "dark",
+    "navigationBarTitleText": "TimeTable",
+    "navigationBarBackgroundColor": "#7cba23",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "课表"
+      },
+      {
+        "pagePath": "pages/settings/settings",
+        "text": "设置"
+      }
+    ],
+    "selectedColor": "#7cba23",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black"
+  }
+}
