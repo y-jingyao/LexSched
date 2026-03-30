@@ -1,4 +1,5 @@
 <!--index.wxml-->
+<page-meta page-style="overflow: hidden;" />
 <view class="page-container">
   <view class="header">
     <view class="header-left">

@@ -38,7 +38,13 @@ Page({
             icon: 'none'
           })
         } else if (res.tapIndex === 1) {
-          wx.navigateTo({
+          // 跳转到首页并触发添加课程
+          const app = getApp()
+          if (app) {
+            app.globalData = app.globalData || {}
+            app.globalData.showAddModal = true
+          }
+          wx.switchTab({
             url: '/pages/index/index'
           })
         } else if (res.tapIndex === 2) {

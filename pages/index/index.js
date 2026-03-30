@@ -51,6 +51,11 @@ Page({
       this.setData({ wlist: [], visibleCourses: [] })
       app.globalData.dataCleared = false
       this.loadCourses()
+    } else if (app?.globalData?.showAddModal) {
+      // 从设置页跳转过来，需要显示添加课程弹窗
+      app.globalData.showAddModal = false
+      this.loadCourses()
+      this.showAddModal()
     } else {
       this.initDateInfo()
     }
@@ -111,8 +116,13 @@ Page({
     const deltaX = moveX - this.data.touchStartX
     const deltaY = moveY - this.data.touchStartY
     
-    // 只有水平滑动才响应
+    // 只有水平滑动才响应，并阻止默认行为防止页面整体滑动
     if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      // 阻止默认行为，防止页面整体被拉动
+      // #ifdef H5
+      e.preventDefault()
+      // #endif
+      
       // 限制滑动距离
       const maxOffset = 150
       const offset = Math.max(-maxOffset, Math.min(maxOffset, deltaX))
