@@ -8,7 +8,7 @@ Page({
     colorArrays: ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7", "#DDA0DD", "#98D8C8", "#F7DC6F", "#BB8FCE"],
     weekDays: [],
     currentDate: '',
-    currentWeek: 1,
+    displayWeek: 1,
     currentMonth: '',
     timeList: [
       { start: "08:00", end: "08:50" },
@@ -38,7 +38,11 @@ Page({
     },
     weeksList: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
     visibleCourses: [],
-    weeksSet: {}
+    weeksSet: {},
+    touchStartX: 0,
+    touchStartY: 0,
+    isAnimating: false,
+    slideOffset: 0
   },
 
   onShow() {
@@ -58,18 +62,27 @@ Page({
 
   initDateInfo() {
     const now = new Date()
-    const semesterStart = dateUtil.getSemesterStartDate()
+    let semesterStart = dateUtil.getSemesterStartDate()
+    if (!semesterStart || isNaN(semesterStart.getTime())) {
+      semesterStart = new Date(2026, 2, 9)
+    }
     const currentWeek = dateUtil.calculateWeekNumber(now, semesterStart)
+    // 打开时默认显示本周
+    const displayWeek = currentWeek
 
     const wlist = this.data.wlist || []
-    const visibleCourses = courseService.processCoursesForDisplay(wlist, currentWeek, this._coursesCache)
-    this._coursesCache = { key: `${wlist.length}-${currentWeek}`, data: visibleCourses }
+    const visibleCourses = courseService.processCoursesForDisplay(wlist, displayWeek, this._coursesCache)
+    this._coursesCache = { key: `${wlist.length}-${displayWeek}`, data: visibleCourses }
+
+    const weekDays = dateUtil.generateWeekDaysByNumber(displayWeek, semesterStart, now)
+    const mondayDate = new Date(semesterStart)
+    mondayDate.setDate(semesterStart.getDate() + (displayWeek - 1) * 7)
 
     this.setData({
-      weekDays: dateUtil.generateWeekDays(now),
+      weekDays,
       currentDate: dateUtil.formatDate(now),
-      currentMonth: `${now.getMonth() + 1}月`,
-      currentWeek,
+      currentMonth: `${mondayDate.getMonth() + 1}月`,
+      displayWeek,
       visibleCourses
     })
   },
@@ -79,6 +92,119 @@ Page({
     this.setData({ wlist: courses }, () => {
       this.initDateInfo()
     })
+  },
+
+  touchStart(e) {
+    if (this.data.isAnimating) return
+    this.setData({
+      touchStartX: e.touches[0].pageX,
+      touchStartY: e.touches[0].pageY,
+      slideOffset: 0
+    })
+  },
+
+  touchMove(e) {
+    if (this.data.isAnimating) return
+    
+    const moveX = e.touches[0].pageX
+    const moveY = e.touches[0].pageY
+    const deltaX = moveX - this.data.touchStartX
+    const deltaY = moveY - this.data.touchStartY
+    
+    // 只有水平滑动才响应
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      // 限制滑动距离
+      const maxOffset = 150
+      const offset = Math.max(-maxOffset, Math.min(maxOffset, deltaX))
+      this.setData({ slideOffset: offset })
+    }
+  },
+
+  touchEnd(e) {
+    if (this.data.isAnimating) return
+    
+    const endX = e.changedTouches[0].pageX
+    const endY = e.changedTouches[0].pageY
+    const deltaX = endX - this.data.touchStartX
+    const deltaY = endY - this.data.touchStartY
+    const minSwipeDistance = 50
+
+    // 只有水平滑动才响应
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (Math.abs(deltaX) >= minSwipeDistance) {
+        if (deltaX > 0) {
+          this.prevWeek()
+        } else {
+          this.nextWeek()
+        }
+      } else {
+        // 滑动距离不够，回弹
+        this.setData({ slideOffset: 0 })
+      }
+    } else {
+      this.setData({ slideOffset: 0 })
+    }
+  },
+
+  prevWeek() {
+    const newWeek = Math.max(1, this.data.displayWeek - 1)
+    if (newWeek !== this.data.displayWeek) {
+      this.switchToWeek(newWeek, 'right')
+    } else {
+      this.setData({ slideOffset: 0 })
+    }
+  },
+
+  nextWeek() {
+    const newWeek = Math.min(20, this.data.displayWeek + 1)
+    if (newWeek !== this.data.displayWeek) {
+      this.switchToWeek(newWeek, 'left')
+    } else {
+      this.setData({ slideOffset: 0 })
+    }
+  },
+
+  switchToWeek(week, direction) {
+    this.setData({ isAnimating: true })
+    
+    const wlist = this.data.wlist
+    let semesterStart = dateUtil.getSemesterStartDate()
+    if (!semesterStart || isNaN(semesterStart.getTime())) {
+      semesterStart = new Date(2026, 2, 9)
+    }
+    const now = new Date()
+    
+    // 预加载新数据
+    const visibleCourses = courseService.processCoursesForDisplay(wlist, week, this._coursesCache)
+    this._coursesCache = { key: `${wlist.length}-${week}`, data: visibleCourses }
+
+    // 生成新周的日期
+    const weekDays = dateUtil.generateWeekDaysByNumber(week, semesterStart, now)
+    const mondayDate = new Date(semesterStart)
+    mondayDate.setDate(semesterStart.getDate() + (week - 1) * 7)
+
+    // 第一阶段：滑动到边缘
+    const slideOutOffset = direction === 'left' ? -150 : 150
+    this.setData({ slideOffset: slideOutOffset })
+
+    // 第二阶段：切换数据并滑回
+    setTimeout(() => {
+      this.setData({
+        displayWeek: week,
+        visibleCourses,
+        weekDays,
+        currentMonth: `${mondayDate.getMonth() + 1}月`,
+        slideOffset: direction === 'left' ? 150 : -150
+      })
+
+      // 第三阶段：平滑回到原位
+      setTimeout(() => {
+        this.setData({
+          slideOffset: 0,
+          isAnimating: false
+        })
+      }, 50)
+    }, 200)
   },
 
   showCourseDetail(e) {
@@ -154,8 +280,8 @@ Page({
         if (res.confirm) {
           courseService.deleteCourse(id)
           const wlist = courseService.getAllCourses()
-          const visibleCourses = courseService.processCoursesForDisplay(wlist, this.data.currentWeek, this._coursesCache)
-          this._coursesCache = { key: `${wlist.length}-${this.data.currentWeek}`, data: visibleCourses }
+          const visibleCourses = courseService.processCoursesForDisplay(wlist, this.data.displayWeek, this._coursesCache)
+          this._coursesCache = { key: `${wlist.length}-${this.data.displayWeek}`, data: visibleCourses }
           this.setData({ wlist, visibleCourses, showModal: false })
           wx.showToast({ title: '删除成功', icon: 'success' })
         }
@@ -240,8 +366,8 @@ Page({
     }
 
     const wlist = courseService.getAllCourses()
-    const visibleCourses = courseService.processCoursesForDisplay(wlist, this.data.currentWeek, this._coursesCache)
-    this._coursesCache = { key: `${wlist.length}-${this.data.currentWeek}`, data: visibleCourses }
+    const visibleCourses = courseService.processCoursesForDisplay(wlist, this.data.displayWeek, this._coursesCache)
+    this._coursesCache = { key: `${wlist.length}-${this.data.displayWeek}`, data: visibleCourses }
 
     this.setData({ wlist, visibleCourses, showModal: false })
     wx.showToast({ title: '保存成功', icon: 'success' })

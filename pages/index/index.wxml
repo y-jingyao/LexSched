@@ -2,7 +2,7 @@
 <view class="page-container">
   <view class="header">
     <view class="header-left">
-      <view class="week-num">第{{currentWeek}}周</view>
+      <view class="week-num">第{{displayWeek}}周</view>
       <view class="date-info">{{currentDate}}</view>
     </view>
     <view class="header-right">
@@ -10,7 +10,7 @@
     </view>
   </view>
 
-  <view class="calendar-row">
+  <view class="calendar-row" style="transform: translateX({{slideOffset}}rpx); transition: transform {{isAnimating ? 200 : 0}}ms ease-out;">
     <view class="month">{{currentMonth}}</view>
     <view wx:for="{{weekDays}}" wx:key="index" class="day-cell {{item.isToday ? 'today' : ''}}">
       <view class="week-day">{{item.weekDay}}</view>
@@ -18,8 +18,16 @@
     </view>
   </view>
 
-  <scroll-view scroll-y="true" class="scroll">
-    <view class="timetable-container">
+  <view class="timetable-area"
+    bindtouchstart="touchStart"
+    bindtouchmove="touchMove"
+    bindtouchend="touchEnd">
+    <!-- 横线放在 timetable-wrapper 外面 -->
+    <view class="grid-lines-container">
+      <view wx:for="{{[1,2,3,4,5,6,7,8,9,10,11]}}" wx:key="index" class="grid-line" style="top:{{index * 120}}rpx;"></view>
+    </view>
+    
+    <view class="timetable-wrapper" style="transform: translateX({{slideOffset}}rpx); transition: transform {{isAnimating ? 200 : 0}}ms ease-out;">
       <view class="time-column">
         <view wx:for="{{timeList}}" wx:key="index" class="time-slot">
           <view class="lesson-num">{{index + 1}}</view>
@@ -29,8 +37,6 @@
       </view>
       
       <view class="course-grid">
-        <view wx:for="{{[1,2,3,4,5,6,7,8,9,10,11]}}" wx:key="index" class="grid-line" style="top:{{index * 120}}rpx;"></view>
-        
         <view wx:for="{{visibleCourses}}" wx:for-item="courseItem" wx:for-index="courseIndex" wx:key="courseIndex">
           <view wx:if="{{courseItem.isVisible}}" class="course-card {{courseItem.isCurrentWeek ? '' : 'not-current-week'}}" 
                 bindtap="showCourseDetail" 
@@ -44,7 +50,7 @@
         </view>
       </view>
     </view>
-  </scroll-view>
+  </view>
 </view>
 
 <!-- 课程详情/编辑弹窗 -->

@@ -78,10 +78,45 @@ function getSemesterStartDate() {
   return savedDate ? new Date(savedDate) : null
 }
 
+/**
+ * 根据周次生成该周的日期数据
+ * @param {number} weekNumber - 周次
+ * @param {Date} semesterStart - 学期开始日期
+ * @param {Date} today - 今天日期
+ * @returns {Array} 一周日期数据
+ */
+function generateWeekDaysByNumber(weekNumber, semesterStart, today) {
+  if (!semesterStart || isNaN(semesterStart.getTime())) {
+    semesterStart = new Date(2026, 2, 9)
+  }
+
+  const weekDayNames = ['一', '二', '三', '四', '五', '六', '日']
+  const weekDays = []
+
+  // 计算该周周一的日期
+  const monday = new Date(semesterStart)
+  monday.setDate(semesterStart.getDate() + (weekNumber - 1) * 7)
+
+  for (let i = 0; i < 7; i++) {
+    const dayDate = new Date(monday)
+    dayDate.setDate(monday.getDate() + i)
+
+    weekDays.push({
+      weekDay: weekDayNames[i],
+      day: dayDate.getDate(),
+      isToday: isSameDay(dayDate, today),
+      fullDate: formatDate(dayDate)
+    })
+  }
+
+  return weekDays
+}
+
 module.exports = {
   formatDate,
   isSameDay,
   calculateWeekNumber,
   generateWeekDays,
-  getSemesterStartDate
+  getSemesterStartDate,
+  generateWeekDaysByNumber
 }

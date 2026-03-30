@@ -123,16 +123,31 @@ page {
   font-weight: bold;
 }
 
-/* 滚动区域 */
-.scroll {
+/* 课程表区域 */
+.timetable-area {
   flex: 1;
-  overflow: scroll;
+  position: relative;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
-.timetable-container {
+.timetable-wrapper {
   display: flex;
   height: 1440rpx;
   min-width: 780rpx;
+  position: relative;
+  z-index: 2;
+}
+
+/* 横线容器 - 放在 timetable-wrapper 外面 */
+.grid-lines-container {
+  position: absolute;
+  top: 0;
+  left: 80rpx;
+  right: 0;
+  height: 1440rpx;
+  z-index: 1;
+  pointer-events: none;
 }
 
 /* 左侧时间列 */
@@ -453,4 +468,47 @@ page {
 .btn-delete {
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   color: #fff;
+}
+
+/* 滑动切换动画 */
+.content-wrapper {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.content-wrapper.left {
+  animation: slideLeft 0.3s ease;
+}
+
+.content-wrapper.right {
+  animation: slideRight 0.3s ease;
+}
+
+@keyframes slideLeft {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(-50rpx);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideRight {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(50rpx);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
