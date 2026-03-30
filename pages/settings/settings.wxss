@@ -1,10 +1,6 @@
 /* pages/settings/settings.wxss */
-page {
-  background-color: #f5f7fa;
-}
 
 .page-container {
-  min-height: 100vh;
   padding: 30rpx;
   box-sizing: border-box;
 }
@@ -51,7 +47,7 @@ page {
 
 .section-title {
   font-size: 26rpx;
-  color: #999;
+  color: var(--text-tertiary);
   margin-bottom: 16rpx;
   padding-left: 10rpx;
   font-weight: 500;
@@ -59,10 +55,10 @@ page {
 
 /* 卡片样式 */
 .card {
-  background-color: #fff;
+  background-color: var(--card-bg);
   border-radius: 20rpx;
   overflow: hidden;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-md);
 }
 
 /* 设置项 */
@@ -75,7 +71,7 @@ page {
 }
 
 .settings-item:active {
-  background-color: #f9f9f9;
+  background-color: var(--bg-color);
 }
 
 .item-left {
@@ -95,7 +91,7 @@ page {
 }
 
 .icon-wrapper.blue {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--secondary-gradient-start) 0%, var(--secondary-gradient-end) 100%);
 }
 
 .icon-wrapper.green {
@@ -103,7 +99,7 @@ page {
 }
 
 .icon-wrapper.orange {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, var(--danger-gradient-start) 0%, var(--danger-gradient-end) 100%);
 }
 
 .icon-wrapper.purple {
@@ -116,7 +112,7 @@ page {
 
 .item-text {
   font-size: 30rpx;
-  color: #333;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
@@ -127,7 +123,7 @@ page {
 
 .item-value {
   font-size: 28rpx;
-  color: #999;
+  color: var(--text-tertiary);
   margin-right: 16rpx;
 }
 
@@ -141,14 +137,14 @@ page {
 
 .arrow {
   font-size: 32rpx;
-  color: #ccc;
+  color: var(--border-color);
   font-weight: 300;
 }
 
 /* 分隔线 */
 .divider {
   height: 1rpx;
-  background-color: #f0f0f0;
+  background-color: var(--border-color);
   margin-left: 118rpx;
 }
 
@@ -160,5 +156,5 @@ page {
 
 .footer-text {
   font-size: 24rpx;
-  color: #bbb;
+  color: var(--text-tertiary);
 }

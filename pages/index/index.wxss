@@ -1,6 +1,5 @@
 /**index.wxss**/
 page {
-  background-color: #f5f7fa;
   height: 100%;
 }
 
@@ -8,7 +7,6 @@ page {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: #f5f7fa;
 }
 
 /* 头部样式 */
@@ -18,7 +16,7 @@ page {
   justify-content: space-between;
   align-items: center;
   padding: 20rpx 30rpx;
-  background-color: #fff;
+  background-color: var(--card-bg);
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -39,7 +37,7 @@ page {
 .add-btn {
   width: 60rpx;
   height: 60rpx;
-  background: linear-gradient(135deg, #52e97a 0%, #4cb628 100%);
+  background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -47,20 +45,20 @@ page {
   color: #fff;
   font-size: 36rpx;
   font-weight: bold;
-  box-shadow: 0 4rpx 12rpx rgba(79, 228, 173, 0.4);
+  box-shadow: var(--shadow-primary);
 }
 
 .week-info {
   font-size: 28rpx;
   font-weight: bold;
-  color: #333;
+  color: var(--text-primary);
   white-space: nowrap;
 }
 
 .week-num {
   font-size: 24rpx;
-  color: #666;
-  background-color: #f0f0f0;
+  color: var(--text-secondary);
+  background-color: var(--bg-color);
   padding: 4rpx 12rpx;
   border-radius: 20rpx;
   white-space: nowrap;
@@ -68,7 +66,7 @@ page {
 
 .date-info {
   font-size: 24rpx;
-  color: #666;
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
@@ -77,9 +75,8 @@ page {
   width: 100%;
   display: flex;
   align-items: center;
-  background-color: #f5f7fa;
   padding: 20rpx 0;
-  border-bottom: 1rpx solid #e8e8e8;
+  border-bottom: 1rpx solid var(--border-color);
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -87,7 +84,7 @@ page {
 .month {
   width: 60rpx;
   font-size: 24rpx;
-  color: #666;
+  color: var(--text-secondary);
   text-align: center;
   writing-mode: vertical-rl;
 }
@@ -102,13 +99,13 @@ page {
 
 .week-day {
   font-size: 24rpx;
-  color: #999;
+  color: var(--text-tertiary);
   margin-bottom: 8rpx;
 }
 
 .day-num {
   font-size: 28rpx;
-  color: #333;
+  color: var(--text-primary);
   width: 48rpx;
   height: 48rpx;
   line-height: 48rpx;
@@ -117,33 +114,30 @@ page {
 }
 
 .day-cell.today .day-num {
-  background-color: #333;
+  background-color: var(--text-primary);
   color: #fff;
 }
 
 .day-cell.today .week-day {
-  color: #333;
+  color: var(--text-primary);
   font-weight: bold;
 }
 
 /* 滚动区域 */
 .scroll {
   flex: 1;
-  background-color: #f5f7fa;
   overflow: scroll;
 }
 
 .timetable-container {
   display: flex;
   height: 1440rpx;
-  background-color: #f5f7fa;
   min-width: 780rpx;
 }
 
 /* 左侧时间列 */
 .time-column {
   width: 80rpx;
-  background-color: #f5f7fa;
   padding-left: 10rpx;
 }
 
@@ -160,18 +154,18 @@ page {
 .lesson-num {
   font-size: 28rpx;
   font-weight: bold;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .start-time {
   font-size: 20rpx;
-  color: #666;
+  color: var(--text-secondary);
   margin-top: 4rpx;
 }
 
 .end-time {
   font-size: 18rpx;
-  color: #999;
+  color: var(--text-tertiary);
   margin-top: 2rpx;
 }
 
@@ -188,7 +182,7 @@ page {
   left: 0;
   right: 0;
   height: 1rpx;
-  background-color: #e8e8e8;
+  background-color: var(--border-color);
 }
 
 /* 课程卡片 */
@@ -200,7 +194,7 @@ page {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .course-name {
@@ -263,8 +257,8 @@ page {
 }
 
 .color-tag.selected {
-  border-color: #333;
-  box-shadow: 0 0 0 2rpx #fff, 0 0 0 6rpx #333;
+  border-color: var(--text-primary);
+  box-shadow: 0 0 0 2rpx #fff, 0 0 0 6rpx var(--text-primary);
 }
 
 /* 弹窗遮罩 */
@@ -286,7 +280,7 @@ page {
   transform: translate(-50%, -50%);
   width: 85%;
   max-width: 650rpx;
-  background-color: #fff;
+  background-color: var(--card-bg);
   border-radius: 24rpx;
   z-index: 1001;
   display: flex;
@@ -299,13 +293,13 @@ page {
   justify-content: space-between;
   align-items: center;
   padding: 30rpx;
-  border-bottom: 1rpx solid #f0f0f0;
+  border-bottom: 1rpx solid var(--border-color);
 }
 
 .modal-title {
   font-size: 32rpx;
   font-weight: bold;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .modal-close {
@@ -315,7 +309,7 @@ page {
   align-items: center;
   justify-content: center;
   font-size: 40rpx;
-  color: #999;
+  color: var(--text-tertiary);
 }
 
 .modal-body {
@@ -327,7 +321,7 @@ page {
 .modal-footer {
   display: flex;
   padding: 20rpx 30rpx;
-  border-top: 1rpx solid #f0f0f0;
+  border-top: 1rpx solid var(--border-color);
   gap: 20rpx;
 }
 
@@ -346,12 +340,12 @@ page {
 
 .detail-label {
   font-size: 26rpx;
-  color: #999;
+  color: var(--text-tertiary);
 }
 
 .detail-value {
   font-size: 30rpx;
-  color: #333;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
@@ -376,28 +370,28 @@ page {
 
 .form-label {
   font-size: 26rpx;
-  color: #666;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .form-input {
   height: 80rpx;
-  background-color: #f5f7fa;
+  background-color: var(--bg-color);
   border-radius: 12rpx;
   padding: 0 20rpx;
   font-size: 28rpx;
-  color: #333;
+  color: var(--text-primary);
   width: 100%;
   box-sizing: border-box;
 }
 
 .form-picker {
   height: 80rpx;
-  background-color: #f5f7fa;
+  background-color: var(--bg-color);
   border-radius: 12rpx;
   padding: 0 20rpx;
   font-size: 28rpx;
-  color: #333;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   width: 100%;
@@ -414,18 +408,18 @@ page {
 .week-tag {
   width: 60rpx;
   height: 60rpx;
-  background-color: #f5f7fa;
+  background-color: var(--bg-color);
   border-radius: 12rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24rpx;
-  color: #666;
+  color: var(--text-secondary);
   flex-shrink: 0;
 }
 
 .week-tag.selected {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--secondary-gradient-start) 0%, var(--secondary-gradient-end) 100%);
   color: #fff;
 }
 
@@ -442,12 +436,12 @@ page {
 }
 
 .btn-cancel {
-  background-color: #f5f7fa;
-  color: #666;
+  background-color: var(--bg-color);
+  color: var(--text-secondary);
 }
 
 .btn-confirm {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--secondary-gradient-start) 0%, var(--secondary-gradient-end) 100%);
   color: #fff;
 }
 

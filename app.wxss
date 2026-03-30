@@ -1,4 +1,39 @@
 /**app.wxss**/
+
+/* CSS 变量定义 */
+page {
+  --primary-color: #7cba23;
+  --primary-light: #96CEB4;
+  --primary-gradient-start: #52e97a;
+  --primary-gradient-end: #4cb628;
+
+  --secondary-color: #667eea;
+  --secondary-gradient-start: #667eea;
+  --secondary-gradient-end: #764ba2;
+
+  --success-color: #11998e;
+  --success-gradient-start: #11998e;
+  --success-gradient-end: #38ef7d;
+
+  --danger-color: #f5576c;
+  --danger-gradient-start: #f093fb;
+  --danger-gradient-end: #f5576c;
+
+  --bg-color: #f5f7fa;
+  --card-bg: #ffffff;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+  --border-color: #e8e8e8;
+
+  --shadow-sm: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+  --shadow-primary: 0 4rpx 12rpx rgba(79, 228, 173, 0.4);
+
+  background-color: var(--bg-color);
+}
+
+/* 通用容器 */
 .container {
   height: 100%;
   display: flex;
@@ -7,4 +42,77 @@
   justify-content: space-between;
   padding: 200rpx 0;
   box-sizing: border-box;
-} 
+}
+
+/* 页面容器 */
+.page-container {
+  min-height: 100vh;
+  background-color: var(--bg-color);
+}
+
+/* 卡片样式 */
+.card {
+  background-color: var(--card-bg);
+  border-radius: 20rpx;
+  box-shadow: var(--shadow-md);
+}
+
+/* 按钮基础样式 */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12rpx;
+  font-weight: 500;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
+  color: #fff;
+  box-shadow: var(--shadow-primary);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, var(--secondary-gradient-start) 0%, var(--secondary-gradient-end) 100%);
+  color: #fff;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, var(--success-gradient-start) 0%, var(--success-gradient-end) 100%);
+  color: #fff;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, var(--danger-gradient-start) 0%, var(--danger-gradient-end) 100%);
+  color: #fff;
+}
+
+/* 表单输入框 */
+.form-input {
+  height: 80rpx;
+  background-color: var(--bg-color);
+  border-radius: 12rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
+  color: var(--text-primary);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 分割线 */
+.divider {
+  height: 1rpx;
+  background-color: var(--border-color);
+  margin: 0 30rpx;
+}
+
+/* 文本颜色类 */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
+.text-primary-color { color: var(--primary-color); }
+
+/* 背景色类 */
+.bg-primary { background-color: var(--primary-color); }
+.bg-secondary { background-color: var(--secondary-color); }
+.bg-card { background-color: var(--card-bg); }

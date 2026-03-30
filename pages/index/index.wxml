@@ -2,7 +2,6 @@
 <view class="page-container">
   <view class="header">
     <view class="header-left">
-      <view class="week-info">{{weekInfo}}</view>
       <view class="week-num">第{{currentWeek}}周</view>
       <view class="date-info">{{currentDate}}</view>
     </view>
@@ -118,7 +117,7 @@
       <view class="form-item">
         <text class="form-label">上课周次（点击选择）</text>
         <view class="weeks-selector">
-          <view wx:for="{{weeksList}}" wx:for-item="weekItem" wx:key="*this" 
+          <view wx:for="{{weeksList}}" wx:for-item="weekItem" wx:key="*this"
                 class="week-tag {{weeksSet[weekItem] ? 'selected' : ''}}"
                 bindtap="toggleWeek" data-week="{{weekItem}}">
             {{weekItem}}

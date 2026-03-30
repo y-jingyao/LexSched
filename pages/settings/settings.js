@@ -1,7 +1,7 @@
 // pages/settings/settings.js
 Page({
   data: {
-    semesterStartDate: '2025/03/09'
+    semesterStartDate: '2026/03/09'
   },
 
   onLoad: function (options) {
@@ -14,42 +14,16 @@ Page({
     }
   },
 
-  // 设置学期开始日期
-  setSemesterStart: function () {
-    wx.showActionSheet({
-      itemList: ['选择日期', '恢复默认'],
-      success: (res) => {
-        if (res.tapIndex === 0) {
-          // 选择日期
-          wx.showModal({
-            title: '设置学期开始日期',
-            editable: true,
-            placeholderText: '请输入日期，如：2026/03/09',
-            success: (modalRes) => {
-              if (modalRes.confirm && modalRes.content) {
-                this.setData({
-                  semesterStartDate: modalRes.content
-                })
-                wx.setStorageSync('semesterStartDate', modalRes.content)
-                wx.showToast({
-                  title: '设置成功',
-                  icon: 'success'
-                })
-              }
-            }
-          })
-        } else if (res.tapIndex === 1) {
-          // 恢复默认
-          this.setData({
-            semesterStartDate: '2026/03/09'
-          })
-          wx.setStorageSync('semesterStartDate', '2026/03/09')
-          wx.showToast({
-            title: '已恢复默认',
-            icon: 'success'
-          })
-        }
-      }
+  // 日期选择器变化
+  onDateChange: function (e) {
+    const selectedDate = e.detail.value
+    this.setData({
+      semesterStartDate: selectedDate
+    })
+    wx.setStorageSync('semesterStartDate', selectedDate)
+    wx.showToast({
+      title: '设置成功',
+      icon: 'success'
     })
   },
 
@@ -77,17 +51,47 @@ Page({
     })
   },
 
-  // 清除缓存
+  // 清除所有数据
   clearCache: function () {
     wx.showModal({
-      title: '提示',
-      content: '确定要清除所有缓存数据吗？',
+      title: '警告',
+      content: '此操作将删除所有课程数据和设置，且无法恢复。确定要继续吗？',
+      confirmColor: '#f5576c',
       success: (res) => {
         if (res.confirm) {
-          wx.clearStorage()
-          wx.showToast({
-            title: '清除成功',
-            icon: 'success'
+          // 二次确认
+          wx.showModal({
+            title: '最终确认',
+            content: '再次确认：删除所有数据后无法恢复，是否继续？',
+            confirmText: '确认删除',
+            confirmColor: '#f5576c',
+            success: (confirmRes) => {
+                if (confirmRes.confirm) {
+                  try {
+                    // 清除所有本地存储
+                    wx.clearStorageSync()
+                    // 重置页面数据
+                    this.setData({
+                      semesterStartDate: '2026/03/09'
+                    })
+                    // 通知课表页面数据已清除
+                    const app = getApp()
+                    if (app) {
+                      app.globalData = app.globalData || {}
+                      app.globalData.dataCleared = true
+                    }
+                    wx.showToast({
+                      title: '已清除所有数据',
+                      icon: 'success'
+                    })
+                  } catch (e) {
+                    wx.showToast({
+                      title: '清除失败',
+                      icon: 'none'
+                    })
+                  }
+                }
+              }
           })
         }
       }

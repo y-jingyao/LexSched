@@ -1,13 +1,12 @@
 //index.js
 //获取应用实例
-var app = getApp()
+const app = getApp()
 
 Page({
   data: {
     colorArrays: ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7", "#DDA0DD", "#98D8C8", "#F7DC6F", "#BB8FCE"],
     weekDays: [],
     currentDate: '',
-    weekInfo: '',
     currentWeek: 1,
     currentMonth: '',
     timeList: [
@@ -43,32 +42,40 @@ Page({
   },
 
   onShow: function () {
-    // 页面显示时刷新日期信息（从设置页面返回时更新周数）
-    this.initDateInfo()
+    // 检查是否需要重新加载数据（数据被清除后）
+    const app = getApp()
+    if (app && app.globalData && app.globalData.dataCleared) {
+      // 清空当前数据
+      this.setData({
+        wlist: [],
+        visibleCourses: []
+      })
+      // 清除标记
+      app.globalData.dataCleared = false
+      // 重新加载（会读取空数据）
+      this.loadCourses()
+    } else {
+      // 页面显示时刷新日期信息（从设置页面返回时更新周数）
+      this.initDateInfo()
+    }
   },
 
   // 初始化日期信息
   initDateInfo: function () {
     const now = new Date()
     const weekDays = this.generateWeekDays(now)
-    const weekInfo = this.calculateWeekInfo(now)
     const currentDate = this.formatDate(now)
     const currentMonth = (now.getMonth() + 1) + '月'
 
-    // 从本地存储读取学期开始日期
     const savedDate = wx.getStorageSync('semesterStartDate')
     const semesterStart = savedDate ? new Date(savedDate) : null
     const currentWeek = this.calculateWeekNumber(now, semesterStart)
 
-    // 获取课程列表（使用当前data中的wlist）
     const wlist = this.data.wlist || []
-
-    // 处理课程显示：标记是否在当前周，处理冲突
     const processedCourses = this.processCourses(wlist, currentWeek)
 
     this.setData({
       weekDays: weekDays,
-      weekInfo: weekInfo,
       currentDate: currentDate,
       currentMonth: currentMonth,
       currentWeek: currentWeek,
@@ -76,56 +83,52 @@ Page({
     })
   },
 
-  // 处理课程显示逻辑
+  // 处理课程显示逻辑（带缓存）
   processCourses: function (wlist, currentWeek) {
-    // 按时间段分组课程
+    // 使用缓存键：课程列表长度 + 当前周次
+    const cacheKey = `${wlist.length}-${currentWeek}`
+    if (this._coursesCache && this._coursesCache.key === cacheKey) {
+      return this._coursesCache.data
+    }
+
     const timeSlots = {}
-    
+
     wlist.forEach(course => {
-      // 确保字段有有效值（兼容旧数据）
-      const onweek = course.onweek || course.xqj || 1
-      const startLesson = course.startLesson || course.skjc || 1
+      const onweek = course.onweek
+      const startLesson = course.startLesson
       const key = `${onweek}-${startLesson}`
       if (!timeSlots[key]) {
         timeSlots[key] = []
       }
-      // 标记是否在当前周
       course.isCurrentWeek = course.weeks && course.weeks.includes(currentWeek)
-      // 确保字段存在
-      course.onweek = onweek
-      course.startLesson = startLesson
-      course.duration = course.duration || course.skcd || 2
-      course.courseName = course.courseName || course.kcmc || ''
       timeSlots[key].push(course)
     })
 
-    // 处理每个时间段的课程
     const result = []
     Object.keys(timeSlots).forEach(key => {
       const courses = timeSlots[key]
-      // 检查是否有本周课程
       const hasCurrentWeek = courses.some(c => c.isCurrentWeek)
-      
+
       courses.forEach(course => {
         if (hasCurrentWeek) {
-          // 如果有本周课程，只显示本周课程，隐藏非本周的
           course.isVisible = course.isCurrentWeek
         } else {
-          // 如果没有本周课程，都显示（非本周的显示为灰色）
           course.isVisible = true
         }
         result.push(course)
       })
     })
 
+    // 缓存结果
+    this._coursesCache = { key: cacheKey, data: result }
     return result
   },
 
   // 计算当前是本学期的第几周
   calculateWeekNumber: function (date, semesterStart) {
-    // 如果没有设置学期开始日期，使用默认日期 2025年2月17日
+    // 如果没有设置学期开始日期，使用默认日期 2026年3月9日
     if (!semesterStart || isNaN(semesterStart.getTime())) {
-      semesterStart = new Date(2025, 1, 17) // 月份从0开始，所以2月是1
+      semesterStart = new Date(2026, 2, 9) // 月份从0开始，所以2月是1
     }
 
     const diffTime = date.getTime() - semesterStart.getTime()
@@ -167,32 +170,12 @@ Page({
            date1.getDate() === date2.getDate()
   },
 
-  // 计算周次信息
-  calculateWeekInfo: function (date) {
-    const weekDayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-    const currentWeekDay = weekDayNames[date.getDay()]
-    
-    // 这里简化处理，实际应该根据学期开始日期计算第几周
-    // 暂时显示当前是星期几
-    return currentWeekDay
-  },
-
   // 格式化日期
   formatDate: function (date) {
     const year = date.getFullYear()
     const month = date.getMonth() + 1
     const day = date.getDate()
     return `${year}/${month}/${day}`
-  },
-
-  // 判断课程是否在当前周显示
-  isCourseVisible: function (course) {
-    return course.weeks && course.weeks.includes(this.data.currentWeek)
-  },
-
-  // 判断是否所有周都有课
-  isAllWeeks: function (weeks) {
-    return weeks && weeks.length === 20
   },
 
   // 格式化周次显示
@@ -224,25 +207,10 @@ Page({
     const id = parseInt(e.currentTarget.dataset.id)
     const course = this.data.wlist.find(item => item.id === id)
     if (!course) return
-    
-    // 确保课程有weeks字段
+
     if (!course.weeks) {
       course.weeks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
     }
-    // 确保字段存在（兼容旧数据）
-    if (!course.onweek && course.xqj) {
-      course.onweek = course.xqj
-    }
-    if (!course.startLesson && course.skjc) {
-      course.startLesson = course.skjc
-    }
-    if (!course.duration && course.skcd) {
-      course.duration = course.skcd
-    }
-    if (!course.courseName && course.kcmc) {
-      course.courseName = course.kcmc
-    }
-    // 预先格式化周次显示
     course.weeksText = this.formatWeeks(course.weeks)
     this.setData({
       showModal: true,
@@ -279,8 +247,7 @@ Page({
   editCourse: function () {
     const course = this.data.currentCourse
     if (!course) return
-    
-    // 查找颜色索引
+
     let colorIndex = 0
     if (course.color) {
       const index = this.data.colorArrays.indexOf(course.color)
@@ -293,21 +260,16 @@ Page({
     weeks.forEach(w => {
       weeksSet[w] = true
     })
-    // 确保字段存在（兼容旧数据）
-    const onweek = course.onweek || course.xqj || 1
-    const startLesson = course.startLesson || course.skjc || 1
-    const duration = course.duration || course.skcd || 2
-    const courseName = course.courseName || course.kcmc || ''
     this.setData({
       modalType: 'edit',
       formData: {
         id: course.id,
-        courseName: courseName,
+        courseName: course.courseName,
         teacher: course.teacher,
         location: course.location,
-        onweek: onweek,
-        startLesson: startLesson,
-        duration: duration,
+        onweek: course.onweek,
+        startLesson: course.startLesson,
+        duration: course.duration,
         weeks: weeks,
         colorIndex: colorIndex
       },
@@ -378,7 +340,7 @@ Page({
       weeks.sort((a, b) => a - b)
     }
 
-    // 创建新的weeksSet用于快速查找
+    // 创建 weeksSet 对象用于 WXML 快速查找
     const weeksSet = {}
     weeks.forEach(w => {
       weeksSet[w] = true
@@ -457,41 +419,43 @@ Page({
     wx.showToast({ title: '保存成功', icon: 'success' })
   },
 
-  onLoad: function () {
-    // 从本地存储加载课程数据
+  // 加载课程数据
+  loadCourses: function () {
     const savedCourses = wx.getStorageSync('courseList')
     if (savedCourses && savedCourses.length > 0) {
-      // 确保所有课程都有weeks字段，并处理字段迁移
       const courses = savedCourses.map(course => {
         if (!course.weeks || !Array.isArray(course.weeks)) {
           course.weeks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
         }
-        // 数据迁移：旧字段转换为新字段
-        if (course.xqj !== undefined && course.onweek === undefined) {
+        if (course.xqj !== undefined) {
           course.onweek = course.xqj
           delete course.xqj
         }
-        if (course.skjc !== undefined && course.startLesson === undefined) {
+        if (course.skjc !== undefined) {
           course.startLesson = course.skjc
           delete course.skjc
         }
-        if (course.skcd !== undefined && course.duration === undefined) {
+        if (course.skcd !== undefined) {
           course.duration = course.skcd
           delete course.skcd
         }
-        if (course.kcmc !== undefined && course.courseName === undefined) {
+        if (course.kcmc !== undefined) {
           course.courseName = course.kcmc
           delete course.kcmc
         }
         return course
       })
-      // 保存迁移后的数据
       wx.setStorageSync('courseList', courses)
       this.setData({ wlist: courses }, () => {
         this.initDateInfo()
       })
     } else {
+      this.setData({ wlist: [], visibleCourses: [] })
       this.initDateInfo()
     }
+  },
+
+  onLoad: function () {
+    this.loadCourses()
   }
 })

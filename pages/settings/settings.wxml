@@ -4,20 +4,22 @@
   <view class="section">
     <view class="section-title">学期设置</view>
     <view class="card">
-      <view class="settings-item" bindtap="setSemesterStart">
-        <view class="item-left">
-          <view class="icon-wrapper">
-            <text class="item-icon">📅</text>
+      <picker mode="date" value="{{semesterStartDate}}" bindchange="onDateChange">
+        <view class="settings-item">
+          <view class="item-left">
+            <view class="icon-wrapper">
+              <text class="item-icon">📅</text>
+            </view>
+            <text class="item-text">学期开始日期</text>
           </view>
-          <text class="item-text">学期开始日期</text>
-        </view>
-        <view class="item-right">
-          <text class="item-value">{{semesterStartDate}}</text>
-          <view class="arrow-wrapper">
-            <text class="arrow">›</text>
+          <view class="item-right">
+            <text class="item-value">{{semesterStartDate}}</text>
+            <view class="arrow-wrapper">
+              <text class="arrow">›</text>
+            </view>
           </view>
         </view>
-      </view>
+      </picker>
     </view>
   </view>
 
@@ -46,7 +48,7 @@
           <view class="icon-wrapper">
             <text class="item-icon">🗑️</text>
           </view>
-          <text class="item-text">清除缓存</text>
+          <text class="item-text">清除所有数据</text>
         </view>
         <view class="item-right">
           <view class="arrow-wrapper">
