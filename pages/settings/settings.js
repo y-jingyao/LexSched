@@ -66,10 +66,10 @@ Page({
             confirmText: '确认删除',
             confirmColor: '#f5576c',
             success: (confirmRes) => {
-                if (confirmRes.confirm) {
-                  try {
-                    // 清除所有本地存储
-                    wx.clearStorageSync()
+              if (confirmRes.confirm) {
+                // 使用异步方式清除存储
+                wx.clearStorage({
+                  success: () => {
                     // 重置页面数据
                     this.setData({
                       semesterStartDate: '2026/03/09'
@@ -84,14 +84,16 @@ Page({
                       title: '已清除所有数据',
                       icon: 'success'
                     })
-                  } catch (e) {
+                  },
+                  fail: () => {
                     wx.showToast({
                       title: '清除失败',
                       icon: 'none'
                     })
                   }
-                }
+                })
               }
+            }
           })
         }
       }
