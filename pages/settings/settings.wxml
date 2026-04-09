@@ -23,6 +23,27 @@
     </view>
   </view>
 
+  <!-- 课表设置 -->
+  <view class="section">
+    <view class="section-title">课表设置</view>
+    <view class="card">
+      <view class="settings-item" bindtap="showScheduleSettings">
+        <view class="item-left">
+          <view class="icon-wrapper">
+            <text class="item-icon">⚙️</text>
+          </view>
+          <text class="item-text">课程时间设置</text>
+        </view>
+        <view class="item-right">
+          <text class="item-value">{{timeList.length}}节课</text>
+          <view class="arrow-wrapper">
+            <text class="arrow">›</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
   <!-- 数据管理 -->
   <view class="section">
     <view class="section-title">数据管理</view>
@@ -71,7 +92,7 @@
           <text class="item-text">关于我们</text>
         </view>
         <view class="item-right">
-          <text class="item-value">v0.0.1</text>
+          <text class="item-value">v0.1.1</text>
           <view class="arrow-wrapper">
             <text class="arrow">›</text>
           </view>
@@ -84,5 +105,210 @@
   <view class="footer">
     <text class="footer-text">Copyright © 2026 - now yanghx. All Rights Reserved.
     </text>
+    <text class="footer-text">
+    鲁ICP备2025168409号-2X
+    </text>
+  </view>
+
+  <!-- 导入弹窗 -->
+  <view class="modal {{showImportModal ? 'show' : ''}}" bindtap="hideImportModal">
+    <view class="modal-content" catchtap="preventBubble">
+      <view class="modal-header">
+        <text class="modal-title">导入课表</text>
+        <view class="modal-close" bindtap="hideImportModal">×</view>
+      </view>
+
+      <view class="modal-body">
+        <!-- 输入区域 -->
+        <view class="input-section">
+          <view class="import-hint">请粘贴从教务系统复制的课表内容</view>
+          <view class="format-example">
+            <text class="format-title">格式示例：</text>
+            <text class="format-content">星期一
+1-2 课程名★ 周数:1-15周/地点:教室/教师:姓名
+3-4 课程名★ 周数:1-8周...
+星期二
+...</text>
+          </view>
+          <textarea
+            class="import-textarea"
+            placeholder="在此粘贴课表内容..."
+            value="{{importText}}"
+            bindinput="onImportTextChange"
+            maxlength="10000"
+          />
+          <button class="parse-btn" bindtap="parseImportText" loading="{{isParsing}}">
+            解析课表
+          </button>
+        </view>
+
+        <!-- 解析结果 -->
+        <view class="result-section" wx:if="{{parsedCourses.length > 0}}">
+          <view class="result-header">
+            <text class="result-title">识别到 {{parsedCourses.length}} 门课程</text>
+            <text class="result-tip">点击课程可编辑，左滑可删除</text>
+          </view>
+          <scroll-view class="course-list" scroll-y>
+            <view class="course-item" wx:for="{{parsedCourses}}" wx:key="index" bindtap="editParsedCourse" data-index="{{index}}">
+              <view class="course-info">
+                <text class="course-name">{{item.courseName}}</text>
+                <text class="course-detail">{{item.teacher}} | {{item.location}}</text>
+                <text class="course-time">第{{item.weeks[0]}}-{{item.weeks[item.weeks.length-1]}}周 星期{{['','一','二','三','四','五','六','日'][item.onweek]}} 第{{item.startLesson}}-{{item.startLesson+item.duration-1}}节</text>
+              </view>
+              <view class="course-actions">
+                <view class="course-edit" catchtap="editParsedCourse" data-index="{{index}}">✎</view>
+                <view class="course-delete" catchtap="removeParsedCourse" data-index="{{index}}">×</view>
+              </view>
+            </view>
+          </scroll-view>
+        </view>
+
+        <!-- 格式说明 -->
+        <view class="format-tips" wx:if="{{parsedCourses.length === 0}}">
+          <text class="tips-title">使用说明：</text>
+          <text class="tips-item">2. 将课表内容复制</text>
+          <text class="tips-item">3. 粘贴到上方文本框</text>
+          <text class="tips-item">4. 点击"解析课表"按钮</text>
+          <text class="tips-title" style="margin-top: 20rpx;">支持格式：</text>
+          <text class="tips-item">• 节次(如1-2) + 课程名★ + 周数</text>
+          <text class="tips-item">• 支持单双周: 1-15周(单)、2-4周(双)</text>
+          <text class="tips-item">• 支持多段周次: 1-5周,7-9周,11-14周</text>
+          <text class="tips-item">• 自动识别星期（星期一~星期日）</text>
+        </view>
+      </view>
+
+      <view class="modal-footer" wx:if="{{parsedCourses.length > 0}}">
+        <button class="cancel-btn" bindtap="hideImportModal">取消</button>
+        <button class="confirm-btn" bindtap="confirmImport">确认导入</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 编辑课程弹窗 -->
+  <view class="modal {{showEditModal ? 'show' : ''}}" bindtap="hideEditModal" wx:if="{{showEditModal}}">
+    <view class="modal-content edit-modal" catchtap="preventBubble">
+      <view class="modal-header">
+        <text class="modal-title">编辑课程</text>
+        <view class="modal-close" bindtap="hideEditModal">×</view>
+      </view>
+
+      <view class="modal-body">
+        <view class="edit-form">
+          <!-- 课程名称 -->
+          <view class="form-item">
+            <text class="form-label">课程名称</text>
+            <input class="form-input" value="{{editForm.courseName}}" data-field="courseName" bindinput="onEditInputChange" placeholder="请输入课程名称"/>
+          </view>
+
+          <!-- 教师 -->
+          <view class="form-item">
+            <text class="form-label">教师</text>
+            <input class="form-input" value="{{editForm.teacher}}" data-field="teacher" bindinput="onEditInputChange" placeholder="请输入教师姓名"/>
+          </view>
+
+          <!-- 地点 -->
+          <view class="form-item">
+            <text class="form-label">上课地点</text>
+            <input class="form-input" value="{{editForm.location}}" data-field="location" bindinput="onEditInputChange" placeholder="请输入上课地点"/>
+          </view>
+
+          <!-- 星期 -->
+          <view class="form-item">
+            <text class="form-label">星期</text>
+            <picker mode="selector" range="{{dayList}}" range-key="label" value="{{editForm.onweek - 1}}" data-field="onweek" bindchange="onEditPickerChange">
+              <view class="picker-value">{{dayList[editForm.onweek - 1].label}}</view>
+            </picker>
+          </view>
+
+          <!-- 开始节次 -->
+          <view class="form-item">
+            <text class="form-label">开始节次</text>
+            <picker mode="selector" range="{{lessonList}}" value="{{editForm.startLesson - 1}}" data-field="startLesson" bindchange="onEditPickerChange">
+              <view class="picker-value">第 {{editForm.startLesson}} 节</view>
+            </picker>
+          </view>
+
+          <!-- 持续节数 -->
+          <view class="form-item">
+            <text class="form-label">持续节数</text>
+            <picker mode="selector" range="{{[1,2,3,4,5,6]}}" value="{{editForm.duration - 1}}" data-field="duration" bindchange="onEditPickerChange">
+              <view class="picker-value">{{editForm.duration}} 节</view>
+            </picker>
+          </view>
+        </view>
+      </view>
+
+      <view class="modal-footer">
+        <button class="cancel-btn" bindtap="hideEditModal">取消</button>
+        <button class="confirm-btn" bindtap="saveEditedCourse">保存</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 课程时间设置弹窗 -->
+  <view class="modal {{showScheduleSettingsModal ? 'show' : ''}}" bindtap="hideScheduleSettingsModal" wx:if="{{showScheduleSettingsModal}}">
+    <view class="modal-content schedule-settings-modal" catchtap="preventBubble">
+      <view class="modal-header">
+        <text class="modal-title">课程时间设置</text>
+        <view class="modal-close" bindtap="hideScheduleSettingsModal">×</view>
+      </view>
+
+      <view class="modal-body">
+        <view class="time-list-header">
+          <text class="header-text">共 {{timeList.length}} 节课</text>
+          <text class="header-tip">（点击时间可编辑）</text>
+        </view>
+        
+        <scroll-view class="time-list" scroll-y>
+          <view class="time-item" wx:for="{{timeList}}" wx:key="index">
+            <text class="lesson-number">第{{index + 1}}节</text>
+            
+            <!-- 显示模式 -->
+            <view class="time-display" wx:if="{{editingTimeIndex !== index}}" bindtap="editLessonTime" data-index="{{index}}">
+              <text class="time-text">{{item.start}} - {{item.end}}</text>
+              <text class="edit-icon">✎</text>
+            </view>
+            
+            <!-- 编辑模式 -->
+            <view class="time-edit" wx:if="{{editingTimeIndex === index}}">
+              <input class="time-input" type="text" value="{{editTimeForm.start}}" data-field="start" bindinput="onTimeInputChange" placeholder="开始时间" maxlength="5"/>
+              <text class="time-separator">-</text>
+              <input class="time-input" type="text" value="{{editTimeForm.end}}" data-field="end" bindinput="onTimeInputChange" placeholder="结束时间" maxlength="5"/>
+              <view class="edit-actions">
+                <text class="action-btn save" bindtap="saveLessonTime">✓</text>
+                <text class="action-btn cancel" bindtap="cancelEditTime">✕</text>
+              </view>
+            </view>
+            
+            <!-- 删除按钮 -->
+            <view class="delete-btn" wx:if="{{editingTimeIndex !== index}}" bindtap="removeLesson" data-index="{{index}}">
+              <text class="delete-icon">×</text>
+            </view>
+          </view>
+        </scroll-view>
+
+        <!-- 添加课程按钮 -->
+        <view class="add-lesson-section">
+          <button class="add-lesson-btn" bindtap="addLesson" wx:if="{{timeList.length < 12}}">
+            <text class="add-icon">+</text>
+            <text class="add-text">添加一节课</text>
+          </button>
+          <text class="max-lesson-tip" wx:if="{{timeList.length >= 12}}">最多支持12节课</text>
+        </view>
+
+        <!-- 使用说明 -->
+        <view class="time-settings-tips">
+          <text class="tips-title">说明：</text>
+          <text class="tips-item">• 时间格式为 HH:MM（如 08:00）</text>
+          <text class="tips-item">• 点击时间可以修改</text>
+          <text class="tips-item">• 最少保留1节课，最多12节课</text>
+          <text class="tips-item">• 设置会自动保存</text>
+        </view>
+      </view>
+
+      <view class="modal-footer">
+        <button class="confirm-btn" bindtap="hideScheduleSettingsModal">完成</button>
+      </view>
+    </view>
   </view>
 </view>

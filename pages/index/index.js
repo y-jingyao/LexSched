@@ -5,7 +5,12 @@ const courseService = require('../../services/courseService')
 
 Page({
   data: {
-    colorArrays: ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7", "#DDA0DD", "#98D8C8", "#F7DC6F", "#BB8FCE"],
+    colorArrays: [
+      "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7", 
+      "#DDA0DD", "#98D8C8", "#F7DC6F", "#BB8FCE", "#FFB6C1",
+      "#87CEEB", "#90EE90", "#FFD700", "#FF8C00", "#FF69B4",
+      "#00CED1", "#9370DB", "#20B2AA", "#F08080", "#87CEFA"
+    ],
     weekDays: [],
     currentDate: '',
     displayWeek: 1,
@@ -37,6 +42,7 @@ Page({
       colorIndex: 0
     },
     weeksList: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+    lessonList: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     visibleCourses: [],
     weeksSet: {},
     touchStartX: 0,
@@ -47,6 +53,10 @@ Page({
 
   onShow() {
     const app = getApp()
+    
+    // 加载课程时间设置
+    this.loadTimeSettings()
+    
     if (app?.globalData?.dataCleared) {
       this.setData({ wlist: [], visibleCourses: [] })
       app.globalData.dataCleared = false
@@ -56,13 +66,32 @@ Page({
       app.globalData.showAddModal = false
       this.loadCourses()
       this.showAddModal()
+    } else if (app?.globalData?.dataUpdated) {
+      // 数据已更新，刷新课程列表
+      app.globalData.dataUpdated = false
+      this.loadCourses()
     } else {
       this.initDateInfo()
     }
   },
 
   onLoad() {
+    // 加载课程时间设置
+    this.loadTimeSettings()
     this.loadCourses()
+  },
+
+  // 加载课程时间设置
+  loadTimeSettings() {
+    const savedTimeList = wx.getStorageSync('timeList')
+    if (savedTimeList && Array.isArray(savedTimeList) && savedTimeList.length > 0) {
+      // 根据 timeList 长度生成 lessonList
+      const lessonList = savedTimeList.map((_, index) => index + 1)
+      this.setData({
+        timeList: savedTimeList,
+        lessonList: lessonList
+      })
+    }
   },
 
   initDateInfo() {

@@ -25,7 +25,7 @@
     bindtouchend="touchEnd">
     <!-- 横线放在 timetable-wrapper 外面 -->
     <view class="grid-lines-container">
-      <view wx:for="{{[1,2,3,4,5,6,7,8,9,10,11]}}" wx:key="index" class="grid-line" style="top:{{index * 120}}rpx;"></view>
+      <view wx:for="{{timeList}}" wx:key="index" class="grid-line" style="top:{{index * 120}}rpx;"></view>
     </view>
     
     <view class="timetable-wrapper" style="transform: translateX({{slideOffset}}rpx); transition: transform {{isAnimating ? 200 : 0}}ms ease-out;">
@@ -39,10 +39,10 @@
       
       <view class="course-grid">
         <view wx:for="{{visibleCourses}}" wx:for-item="courseItem" wx:for-index="courseIndex" wx:key="courseIndex">
-          <view wx:if="{{courseItem.isVisible}}" class="course-card {{courseItem.isCurrentWeek ? '' : 'not-current-week'}}" 
+          <view wx:if="{{courseItem.isVisible && courseItem.onweek >= 1 && courseItem.onweek <= 7}}" class="course-card {{courseItem.isCurrentWeek ? '' : 'not-current-week'}}" 
                 bindtap="showCourseDetail" 
                 data-id="{{courseItem.id}}"
-                style="left:{{(courseItem.onweek-1) * 100}}rpx;top:{{(courseItem.startLesson-1) * 120 + 5}}rpx;height:{{courseItem.duration * 120 - 10}}rpx;background-color:{{courseItem.isCurrentWeek ? (courseItem.color ? courseItem.color : colorArrays[(courseItem.id-1)%9]) : '#999999'}}">
+                style="left:{{(courseItem.onweek-1) * 100 + 2}}rpx;top:{{(courseItem.startLesson-1) * 120 + 5}}rpx;height:{{courseItem.duration * 120 - 10}}rpx;background-color:{{courseItem.isCurrentWeek ? (courseItem.color ? courseItem.color : colorArrays[(courseItem.id-1)%9]) : '#999999'}}">
             <view class="course-name">{{courseItem.courseName}}</view>
             <view wx:if="{{!courseItem.isCurrentWeek}}" class="not-current-week-tag">非本周</view>
             <view class="course-teacher">{{courseItem.teacher}}</view>
@@ -111,7 +111,7 @@
       </view>
       <view class="form-item">
         <text class="form-label">开始节次</text>
-        <picker mode="selector" range="{{[1,2,3,4,5,6,7,8,9,10]}}" value="{{(formData.startLesson || 1)-1}}" bindchange="startChange">
+        <picker mode="selector" range="{{lessonList}}" value="{{(formData.startLesson || 1)-1}}" bindchange="startChange">
           <view class="form-picker">第{{formData.startLesson}}节</view>
         </picker>
       </view>
